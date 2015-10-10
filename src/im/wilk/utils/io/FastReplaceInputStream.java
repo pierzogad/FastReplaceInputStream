@@ -1,6 +1,4 @@
-package im.wilk.utils;
-
-import com.sun.xml.internal.fastinfoset.stax.events.CharactersEvent;
+package im.wilk.utils.io;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -45,7 +43,7 @@ public class FastReplaceInputStream extends FilterInputStream {
      * @param in the underlying input stream, or <code>null</code> if
      *           this instance is to be created without an underlying stream.
      */
-    public FastReplaceInputStream(PushbackInputStream in, Map<byte [], byte []> replace) {
+    private FastReplaceInputStream(PushbackInputStream in, Map<byte [], byte []> replace) {
         super(in);
         this.replacements = replace;
         replacements.forEach((k, v) -> populateMaps(k, v));
@@ -99,16 +97,17 @@ public class FastReplaceInputStream extends FilterInputStream {
 
         currentMap = maps.get(currentMap.map[ret]);
         while (true) {
+            if (currentMap.replacement != null) {
+                current = currentMap.replacement;
+                stored = 0;
+            }
+
             int idx = in.read();
 
             if (idx > 0) {
                 bytes[stored++] = (byte) idx;
                 if (currentMap.map != null && currentMap.map[idx] > 0) {
                     currentMap = maps.get(currentMap.map[idx]);
-                    if (currentMap.replacement != null) {
-                        current = currentMap.replacement;
-                        stored = 0;
-                    }
                     continue;
                 }
             }
@@ -119,13 +118,18 @@ public class FastReplaceInputStream extends FilterInputStream {
                     if (stored > 0) {
                         ret = bytes[0];
                         System.arraycopy(bytes, 1, bytes, 0, --stored);
+                        currentMap = maps.get(0);
+                        if (currentMap.map[ret] != 0) {
+                            currentMap = maps.get(currentMap.map[ret]);
+                            continue;
+                        }
                     } else {
                         ret = -1;
                     }
-                    continue;
+                } else {
+                    offset = 1;
+                    ret = current[0];
                 }
-                offset = 1;
-                ret = current[0];
             }
 
             if (stored > 0) {
