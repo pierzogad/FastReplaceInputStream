@@ -24,10 +24,9 @@ public class FastReplaceInputStreamTest {
         String s = "This is foobar";
         ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes());
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("foo", "FOO")
                 .withReplacement("bar", "BAR")
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("This is FOOBAR")));
@@ -39,9 +38,8 @@ public class FastReplaceInputStreamTest {
         String s = "1: abcd 2:abce";
         ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes());
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("abcd", "XX")
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("1: XX 2:abce")));
@@ -53,10 +51,9 @@ public class FastReplaceInputStreamTest {
         String s = "text is: abcd bcd.";
         ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes());
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("abcd", "long")
                 .withReplacement("bcd", "shorter")
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("text is: long shorter.")));
@@ -68,9 +65,8 @@ public class FastReplaceInputStreamTest {
         String s = "Text\n with tabs\n and some\n control characters\n";
         ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes());
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("\n", "")
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("Text with tabs and some control characters")));
@@ -82,11 +78,10 @@ public class FastReplaceInputStreamTest {
         String s = "Text\twith tabs\r\nand some\ncontrol characters";
         ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes());
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("\t", " ")
                 .withReplacement("\r", "")
                 .withReplacement("\n", "<br/>")
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("Text with tabs<br/>and some<br/>control characters")));
@@ -100,20 +95,18 @@ public class FastReplaceInputStreamTest {
 
         ByteArrayInputStream is = new ByteArrayInputStream(latinTextAsBytes);
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("©", "(C) - latin1")
                 .withCharset(Charset.forName("CP1252"))
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st, Charset.forName("CP1252")));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("Abc (C) - latin1")));
 
         is = new ByteArrayInputStream(utf8textAsBytes);
         st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 // .withCharset(Charset.forName("UTF8")) UTF8 is default encoding
                 .withReplacement("©", "(C) - utf8")
-                .build();
+                .build(is);
         r = new BufferedReader(new InputStreamReader(st, Charset.forName("UTF8")));
         res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("Abc (C) - utf8")));
@@ -126,11 +119,10 @@ public class FastReplaceInputStreamTest {
         String s = "text is: abcd abc ab.";
         ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes());
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("ab", ">2<")
                 .withReplacement("abc", ">3<")
                 .withReplacement("abcd", ">4<")
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("text is: >4< >3< >2<.")));
@@ -142,9 +134,8 @@ public class FastReplaceInputStreamTest {
         String s = "text is: abcd abc ab.";
         ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes());
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("ab", "")
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("text is: cd c .")));
@@ -156,10 +147,9 @@ public class FastReplaceInputStreamTest {
         String s = "text is: abcd abc ab.";
         ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes());
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("ab", "")
                 .withReplacement("abcd", "aa")
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("text is: aa c .")));
@@ -171,11 +161,10 @@ public class FastReplaceInputStreamTest {
         String s = "text is: abc";
         ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes());
         FastReplaceInputStream st = FastReplaceInputStream.builder()
-                .withInputStream(is)
                 .withReplacement("ab", ">2<")
                 .withReplacement("abc", ">3<")
                 .withReplacement("abcd", ">4<")
-                .build();
+                .build(is);
         BufferedReader r = new BufferedReader(new InputStreamReader(st));
         String res = r.readLine();
         Assert.assertThat(res, Is.is(CoreMatchers.equalTo("text is: >3<")));

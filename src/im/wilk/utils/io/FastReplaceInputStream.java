@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * The InputStream wrapper.
+ * Instance of this class must be created using {@link im.wilk.utils.io.FastReplaceInputStream.Builder} Builder
  *
+ * @see java.io.InputStream
  */
 public class FastReplaceInputStream extends FilterInputStream {
 
@@ -154,35 +157,65 @@ public class FastReplaceInputStream extends FilterInputStream {
         return added;
     }
 
+    /**
+     * Creates a {@link im.wilk.utils.io.FastReplaceInputStream.Builder} instance.
+     * @return new instance of Builder
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * A builder class that creates an instance of FastReplaceInputStream.
+     *
+     */
     public static class Builder {
-        private PushbackInputStream pushbackInputStream;
         private Map<String, String> replace = new HashMap<>();
         private Charset charset = Charset.forName("UTF8");
 
-        public Builder withInputStream(InputStream in) {
-            pushbackInputStream = new PushbackInputStream(in, MAX_SEARCHED_BYTES);
-            return this;
+        private Builder() {
         }
-
+        /**
+         * Set replacement dictionary as a single map.
+         * @param replaceMap Map of string_to_be_replaced =&gt; substitute.
+         * @return Builder
+         */
         public Builder withReplaceMap(Map<String, String> replaceMap) {
             replace = replaceMap;
             return this;
         }
 
+        /**
+         * Add another replacement to dictionary.
+         * @param toReplace string_to_be_replaced
+         * @param substitute substitute
+         * @return Builder
+         */
         public Builder withReplacement(String toReplace, String substitute) {
             replace.put(toReplace, substitute);
             return this;
         }
-        
+
+        /**
+         * Define CharSet used in replacement dictionary strings.
+         * If not set the default value of UTF-8 is used.
+         *
+         * @param charset CharSet used in replacement dictionary strings
+         * @return Builder
+         */
         public Builder withCharset(Charset charset) {
             this.charset = charset;
             return this;
         }
-        public FastReplaceInputStream build() {
+
+        /**
+         * Build FastReplaceInputStream using provided information.
+         *
+         * @param in InputStream to be wrapped.
+         * @return FastReplaceInputStream - wrapped InputStream that will do the replacements.
+         */
+        public FastReplaceInputStream build(InputStream in) {
+            PushbackInputStream pushbackInputStream = new PushbackInputStream(in, MAX_SEARCHED_BYTES);
             Map<byte [], byte []> asBytes = new HashMap<>();
             replace.forEach((k, v) -> asBytes.put(k.getBytes(charset), v.getBytes(charset)));
             return new FastReplaceInputStream(pushbackInputStream, asBytes);
